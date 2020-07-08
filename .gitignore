@@ -1,0 +1,9 @@
+.tmp_versions
+*.mod.c
+*.cmd
+*.mk
+*.symvers
+*.order
+*.o
+*.txt
+
