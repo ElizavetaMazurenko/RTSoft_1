@@ -45,7 +45,9 @@ int main( int argc, char** argv )
  //bool nightMode = false;
     //help();
 
-    VideoCapture cap(0);
+    VideoCapture cap("/home/liza/Документы/Нужно/6_сем/Практика/ЗАДАНИЕ СР/hist/тучи4.mp4");
+    // "/home/liza/Документы/Нужно/6_сем/Практика/ЗАДАНИЕ СР/hist/Timelapse.mp4"
+    // "/home/liza/Загрузки/158 Лед.mp4"
     // open the video file for reading
 
     if( !cap.isOpened() )
@@ -56,7 +58,10 @@ int main( int argc, char** argv )
     namedWindow( "LK Demo", 1 );
 //setMouseCallback( "LK Demo", onMouse, 0 );
     Mat gray, prevGray, image, frame;
-    int counter = 0, sum_cloud = 0, cloud_counter;
+    int counter = 0, sum_cloud = 0, cloud_counter = 0, count_tang = 0;
+    int sumtang = 0;
+    int sumcos = 0;
+    Point2f center, arrow_end;
     vector<Point2f> points[2];
     for(;;)
     {
@@ -64,12 +69,27 @@ int main( int argc, char** argv )
         cap >> frame;
         if( frame.empty() )
             break;
+        resize(frame, frame, cv::Size(), 0.4, 0.4);
         frame.copyTo(image);
         cvtColor(image, gray, COLOR_BGR2GRAY); //чернобелим
 /*        if( nightMode )
             image = Scalar::all(0);*/
-        if( counter % 100 == 0 )
+        if( counter % 80 == 0 )
         {
+            cout << sumcos << "tan = " << sumtang << endl;
+
+            if (count_tang != 0) {
+                center.x = image.size().width/2;
+                center.y = image.size().height/2;
+
+                if (sumcos > 0) {
+                    arrow_end.x = center.x + 60;
+                    arrow_end.y = center.y + 60*sumtang / count_tang;
+                } else {
+                    arrow_end.x = center.x - 60;
+                    arrow_end.y = center.y - 60*sumtang / count_tang;
+                }
+            }
             if (cloud_counter > 50) {
                 cloud_counter = 0;
                 cout << "Скоро грянет буря!" << endl;
@@ -83,7 +103,14 @@ int main( int argc, char** argv )
         }
         else if( !points[0].empty() )
         {
+            line(image,center, arrow_end,Scalar(0,0,0),2);
+            circle( image, arrow_end, 5, Scalar(0,0,0), -1, 8);
+
             sum_cloud = 0;
+            count_tang = 0;
+            sumtang = 0;
+            sumcos = 0;
+
             vector<uchar> status;
             vector<float> err;
             if(prevGray.empty())
@@ -109,9 +136,20 @@ int main( int argc, char** argv )
                 line(image,points[0][i], points[1][i],Scalar(255,0,0));
                 circle( image, points[1][i], 3, Scalar(0,255,0), -1, 8);
 
-                if ((abs(points[0][i].x - points[1][i].x) > 0.5) or
-                        (abs(points[0][i].y - points[1][i].y) > 0.5))
+               // if ((abs(points[0][i].x - points[1][i].x) > 0.1) or
+                  //      (abs(points[0][i].y - points[1][i].y) > 0.1))  {
                     sum_cloud ++;
+                    // считаем тангенс векторов движения
+                    sumtang += ((points[1][i].y - points[0][i].y)/(points[1][i].x - points[0][i].x));
+                    count_tang ++;
+                    // считаем косинусы векторов движения
+                    sumcos += (points[1][i].x - points[0][i].x);
+                            //                        (sqrt((points[1][i].y - points[0][i].y)
+                          //  + (points[1][i].x - points[0][i].x)));
+                   // cout << (points[1][i].y - points[0][i].y)*(points[1][i].y - points[0][i].y) << endl;
+
+               // }
+
             }
             if (sum_cloud > 0.9*points[0].size())
                 cloud_counter ++;
