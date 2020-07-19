@@ -6,7 +6,8 @@ CONFIG -= qt
 SOURCES += hist.cpp\
     hist1.cpp \
     camera.cpp \
-    opticalflow.cpp
+    opticalflow_sparse.cpp \
+    opticalflow_dense.cpp
 
 INCLUDEPATH += /usr/include/opencv
 LIBS += /usr/lib/x86_64-linux-gnu/libopencv_calib3d.so \
