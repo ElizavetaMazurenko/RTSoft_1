@@ -13,6 +13,7 @@ using namespace std;
 using namespace cv;
 
 void kMeansClustering(Mat MainFrame, Mat &retCartoon);
+
 Point2f point;
 
 int mainsparse( int argc, char** argv )
